@@ -167,7 +167,7 @@ int Genetic::isValidSolution(vector<int>& solution)
 bool Genetic::existsChromosome(const vector<int> & v)
 {
 	// checks if exists in the population
-	for(vector<pair<vector<atomic<int> >, atomic<int> > >::iterator it=population.begin(); it!=population.end(); ++it)
+	for(vector<pair<vector<int>, int> >::iterator it=population.begin(); it!=population.end(); ++it)
 	{
 		const vector<int>& vec = (*it).first; // gets the vector
 		if(equal(v.begin(), v.end(), vec.begin())) // compares vectors
@@ -179,7 +179,7 @@ bool Genetic::existsChromosome(const vector<int> & v)
 
 void Genetic::initialPopulation() // generates the initial population
 {
-	vector<atomic<int> > parent;
+	vector<int> parent;
 
 	// inserts initial vertex in the parent
 	parent.push_back(graph->initial_vertex);
@@ -191,7 +191,7 @@ void Genetic::initialPopulation() // generates the initial population
 			parent.push_back(i);
 	}
 
-	atomic<int> total_cost = isValidSolution(parent);
+	int total_cost = isValidSolution(parent);
 
 	if(total_cost != -1) // checks if the parent is valid
 	{
@@ -212,6 +212,7 @@ void Genetic::initialPopulation() // generates the initial population
 		{
 			population.push_back(make_pair(parent, total_cost)); // add in population
 			real_size_population++; // increments real_size_population in the unit
+      // cout<<real_size_population<<endl;
 		}
 		if(real_size_population == size_population) // checks size population
 			break;
@@ -219,9 +220,22 @@ void Genetic::initialPopulation() // generates the initial population
 
 	// checks if real_size_population is 0
 	if(real_size_population == 0)
-		cout << "\nEmpty initial population ;( Try again runs the algorithm...";
+		cout << "\nEmpty initial population ;( Try again\n";
 	else
 		sort(population.begin(), population.end(), sort_pred()); // sort population
+  int i = 0;
+  for(i = 0; i+num_proc<population.size(); i+=num_proc)
+  {
+    for (int j = 0; j < num_proc; j++) {
+      th_population[j].push_back(population[i+j]);
+    }
+  }
+  int z = population.size()-i;
+  for(int j = 0; j<z; j++){
+    th_population[j].push_back(population[i+j]);
+  }
+
+
 }
 
 
@@ -521,7 +535,7 @@ void Genetic::run()
 	const vector<int>& vec = population[0].first;
 	for(int i = 0; i < graph->V; i++)
 		cout << vec[i] << " ";
-	cout << graph->initial_vertex;
+	// cout << graph->initial_vertex;
 	cout << " | Cost: " << population[0].second;
 }
 

@@ -10,6 +10,8 @@
 #include <thread>
 #include <atomic>
 
+#define num_proc 4
+
 
 // class that represents the graph
 class Graph
@@ -29,7 +31,7 @@ public:
 	friend class Genetic; // to access private membres this class
 };
 
-typedef std::pair<std::vector<std::atomic<int> >, std::atomic<int> > my_pair;
+typedef std::pair<std::vector<int >, int > my_pair;
 
 
 // sort vector with pair
@@ -47,6 +49,7 @@ class Genetic
 private:
 	Graph* graph; // the graph
 	std::vector< my_pair > population; // each element is a pair: vector and total cost
+  std::array< std::vector<my_pair>, num_proc> th_population;
 	int size_population; // size of population
 	int real_size_population; // real size population
 	int generations; // amount of generations

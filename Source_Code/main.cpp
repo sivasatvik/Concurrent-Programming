@@ -4,7 +4,7 @@ using namespace std;
 
 int main()
 {
-	srand(time(NULL)); // random numbers
+	srand(SEED); // random numbers
 
 	// creates the graph1 with parameters: number of vertexes and initial vertex
 	Graph * graph1 = new Graph(5, 0);
@@ -63,15 +63,15 @@ int main()
 	graph3->addEdge(2, 1, 35);
 
 	// creates random graph, parameter true is for generate the graph
-	Graph * graph4 = new Graph(1000, 0, true);
+	Graph * graph4 = new Graph(500, 0, true);
 	graph4->showInfoGraph();
   // graph4->showGraph();
 
 	// parameters: the graph, population size, generations and mutation rate
 	// optional parameters: show_population
-	Genetic genetic(graph4, 10, 2000, 5, true);
-  // Genetic genetic1(graph4, 10, 10000, 5, true);
-  // Genetic genetic2(graph4, 10, 10000, 5, true);
+	Genetic genetic(graph4, N, 10000, 5, true);
+  // Genetic genetic1(graph4, N, 1000, 5, true);
+  // Genetic genetic2(graph4, N, 1000, 5, true);
 
 
 	const clock_t begin_time = clock(); // gets time
