@@ -10,6 +10,8 @@
 #include <thread>
 #include <atomic>
 
+#define num_proc 4
+
 
 // class that represents the graph
 class Graph
@@ -29,7 +31,7 @@ public:
 	friend class Genetic; // to access private membres this class
 };
 
-typedef std::pair<std::vector<std::atomic<int> >, std::atomic<int> > my_pair;
+typedef std::pair<std::vector<int >, int > my_pair;
 
 
 // sort vector with pair
@@ -47,6 +49,7 @@ class Genetic
 private:
 	Graph* graph; // the graph
 	std::vector< my_pair > population; // each element is a pair: vector and total cost
+  	std::array< std::vector<my_pair>, num_proc> th_population;
 	int size_population; // size of population
 	int real_size_population; // real size population
 	int generations; // amount of generations
@@ -55,12 +58,14 @@ private:
 private:
 	void initialPopulation(); // generates the initial population
 public:
+	std::vector<my_pair> result;
 	Genetic(Graph* graph, int amount_population, int generations, int mutation_rate, bool show_population = true); // constructor
 	int isValidSolution(std::vector<int>& solution); // checks if a solution is valid
 	void showPopulation(); // shows population
 	void crossOver(std::vector<int>& parent1, std::vector<int>& parent2); // makes the crossover
 	void insertBinarySearch(std::vector<int>& child, int total_cost); // uses binary search to insert
-	void run(); // runs genetic algorithm
+	void run(int thead_id); // runs genetic algorithm(Multi-threaded)
+	// void run();
 	int getCostBestSolution(); // returns cost of the best solution
 	bool existsChromosome(const std::vector<int> & v); // checks if exists the chromosome
 };
