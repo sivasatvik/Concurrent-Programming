@@ -223,17 +223,17 @@ void Genetic::initialPopulation() // generates the initial population
 		cout << "\nEmpty initial population ;( Try again\n";
 	else
 		sort(population.begin(), population.end(), sort_pred()); // sort population
-  int i = 0;
-  for(i = 0; i+num_proc<population.size(); i+=num_proc)
-  {
-    for (int j = 0; j < num_proc; j++) {
-      th_population[j].push_back(population[i+j]);
-    }
-  }
-  int z = population.size()-i;
-  for(int j = 0; j<z; j++){
-    th_population[j].push_back(population[i+j]);
-  }
+	int i = 0;
+	for(i = 0; i+num_proc<population.size(); i+=num_proc)
+	{
+		for (int j = 0; j < num_proc; j++) {
+	  		th_population[j].push_back(population[i+j]);
+	  	}
+	}
+	int z = population.size()-i;
+	for(int j = 0; j<z; j++){
+		th_population[j].push_back(population[i+j]);
+	}
 
 
 }
@@ -453,91 +453,189 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2)
 }
 
 
-// runs the genetic algorithm
-void Genetic::run()
+// runs the genetic algorithm (Multi-threaded)
+void Genetic::run(int thread_id)
 {
-	initialPopulation(); // gets initial population
-
-	if(real_size_population == 0)
+	cout<<"Thead number "<<thread_id<<" is running rn!!\n";
+	cout<<"Hello1\n";
+	initialPopulation(); // gets initial my_population
+	auto my_population = th_population[thread_id];
+	cout<<my_population[0].second<<endl;
+	auto my_size_population = my_population.size();
+	auto n_generation = generations/num_proc;
+	// cout<<"Hello1: "<<n_generation;
+	auto my_max_size_population = (2*size_population)/num_proc; // <==== see best value for this 
+	if(my_size_population == 0)
 		return;
 
-	for(int i = 0; i < generations; i++)
+	for(int i = 0; i < n_generation; i++)
 	{
-		int  old_size_population = real_size_population;
+		int  old_size_population = my_size_population;
 
 		/* selects two parents (if exists) who will participate
 			of the reproduction process */
-		if(real_size_population >= 2)
+		if(my_size_population >= 2)
 		{
-			if(real_size_population == 2)
+			if(my_size_population == 2)
 			{
 				// applying crossover in the parents
-				crossOver(population[0].first, population[1].first);
+				crossOver(my_population[0].first, my_population[1].first);
 			}
 			else
 			{
-				// real_size_population > 2
-
+				// my_size_population > 2
 				int parent1, parent2;
-
 				do
 				{
 					// select two random parents
-					parent1 = rand() % real_size_population;
-					parent2 = rand() % real_size_population;
+					parent1 = rand() % my_size_population;
+					parent2 = rand() % my_size_population;
 				}while(parent1 == parent2);
 
 				// applying crossover in the two parents
-				crossOver(population[parent1].first, population[parent2].first);
+				crossOver(my_population[parent1].first, my_population[parent2].first);
 			}
 
-			// gets difference to check if the population grew
-			int diff_population = real_size_population - old_size_population;
+			// gets difference to check if the my_population grew
+			int diff_population = my_size_population - old_size_population;
 
 			if(diff_population == 2)
 			{
-				if(real_size_population > size_population)
+				if(my_size_population > my_max_size_population)
 				{
-					// removes the two worst parents of the population
-					population.pop_back();
-					population.pop_back();
+					// removes the two worst parents of the my_population
+					// This helps in converging of values
+					my_population.pop_back();
+					my_population.pop_back();
 
-					// decrements the real_size_population in 2 units
-					real_size_population -= 2;
+					// decrements the my_size_population in 2 units
+					my_size_population -= 2;
 				}
 			}
 			else if(diff_population == 1)
 			{
-				if(real_size_population > size_population)
+				if(my_size_population > my_max_size_population)
 				{
-					population.pop_back(); // removes the worst parent of the population
-					real_size_population--; // decrements the real_size_population in the unit
+					my_population.pop_back(); // removes the worst parent of the my_population
+					my_size_population--; // decrements the my_size_population in the unit
 				}
 			}
 		}
-		else // population contains only 1 parent
+		else // my_population contains only 1 parent
 		{
 			// applying crossover in the parent
-			crossOver(population[0].first, population[0].first);
-
-			if(real_size_population > size_population)
+			crossOver(my_population[0].first, my_population[0].first);
+			if(my_size_population > my_max_size_population)
 			{
-				population.pop_back(); // removes the worst parent of the population
-				real_size_population--; // decrements the real_size_population in the unit
+				my_population.pop_back(); // removes the worst parent of the my_population
+				my_size_population--; // decrements the my_size_population in the unit
 			}
 		}
 	}
 
 	if(show_population == true)
-		showPopulation(); // shows the population
+		showPopulation(); // shows the my_population
 
-	cout << "\nBest solution: ";
-	const vector<int>& vec = population[0].first;
-	for(int i = 0; i < graph->V; i++)
-		cout << vec[i] << " ";
+	result.push_back(my_population[0]);
+	// cout << "\nBest solution: ";
+	// const vector<int>& vec = my_population[0].first;
+	// for(int i = 0; i < graph->V; i++)
+	// 	cout << vec[i] << " ";
 	// cout << graph->initial_vertex;
-	cout << " | Cost: " << population[0].second;
+	// cout << " | Cost: " << my_population[0].second;
 }
+
+
+
+
+
+// // runs the genetic algorithm
+// void Genetic::run()
+// {
+// 	initialPopulation(); // gets initial population
+
+// 	if(real_size_population == 0)
+// 		return;
+
+// 	for(int i = 0; i < generations; i++)
+// 	{
+// 		int  old_size_population = real_size_population;
+
+// 		/* selects two parents (if exists) who will participate
+// 			of the reproduction process */
+// 		if(real_size_population >= 2)
+// 		{
+// 			if(real_size_population == 2)
+// 			{
+// 				// applying crossover in the parents
+// 				crossOver(population[0].first, population[1].first);
+// 			}
+// 			else
+// 			{
+// 				// real_size_population > 2
+
+// 				int parent1, parent2;
+
+// 				do
+// 				{
+// 					// select two random parents
+// 					parent1 = rand() % real_size_population;
+// 					parent2 = rand() % real_size_population;
+// 				}while(parent1 == parent2);
+
+// 				// applying crossover in the two parents
+// 				crossOver(population[parent1].first, population[parent2].first);
+// 			}
+
+// 			// gets difference to check if the population grew
+// 			int diff_population = real_size_population - old_size_population;
+
+// 			if(diff_population == 2)
+// 			{
+// 				if(real_size_population > size_population)
+// 				{
+// 					// removes the two worst parents of the population
+// 					population.pop_back();
+// 					population.pop_back();
+
+// 					// decrements the real_size_population in 2 units
+// 					real_size_population -= 2;
+// 				}
+// 			}
+// 			else if(diff_population == 1)
+// 			{
+// 				if(real_size_population > size_population)
+// 				{
+// 					population.pop_back(); // removes the worst parent of the population
+// 					real_size_population--; // decrements the real_size_population in the unit
+// 				}
+// 			}
+// 		}
+// 		else // population contains only 1 parent
+// 		{
+// 			// applying crossover in the parent
+// 			crossOver(population[0].first, population[0].first);
+
+// 			if(real_size_population > size_population)
+// 			{
+// 				population.pop_back(); // removes the worst parent of the population
+// 				real_size_population--; // decrements the real_size_population in the unit
+// 			}
+// 		}
+// 	}
+
+// 	if(show_population == true)
+// 		showPopulation(); // shows the population
+
+// 	cout << "\nBest solution: ";
+// 	const vector<int>& vec = population[0].first;
+// 	for(int i = 0; i < graph->V; i++)
+// 		cout << vec[i] << " ";
+// 	// cout << graph->initial_vertex;
+// 	cout << " | Cost: " << population[0].second;
+// }
+
+
 
 
 int Genetic::getCostBestSolution()
