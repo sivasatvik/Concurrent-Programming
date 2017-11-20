@@ -265,7 +265,7 @@ void Genetic::initialPopulation() // generates the initial population
 
 void Genetic::showPopulation(int thread_id)
 {
-	cout << "\nShowing threads Population...\n\n";
+	cout << "\nShowing " << thread_id << "'s Population...\n\n";
 	for(vector<pair<vector<int>, int> >::iterator it=th_population[thread_id].begin(); it!=th_population[thread_id].end(); ++it)
 	{
 		const vector<int>& vec = (*it).first; // gets the vector
@@ -297,7 +297,7 @@ void Genetic::showPopulation()
 // inserts in the vector using binary search
 void Genetic::insertBinarySearch(vector<int>& child, int total_cost, int thread_id)
 {
-	cout << "insertBinarySearch start \n";
+	// cout << "insertBinarySearch start " << total_cost << " \n" ; 
 	int imin = 0;
 	int imax = real_size_population[thread_id] - 1;
 
@@ -316,7 +316,7 @@ void Genetic::insertBinarySearch(vector<int>& child, int total_cost, int thread_
 			imax = imid - 1;
 	}
 	th_population[thread_id].insert(th_population[thread_id].begin() + imin, make_pair(child, total_cost));
-	cout << "insertBinarySearch end \n";
+	// cout << "insertBinarySearch end \n";
 }
 
 // inserts in the vector using binary search
@@ -371,22 +371,27 @@ void Genetic::insertBinarySearch(vector<int>& child, int total_cost)
 */
 void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2, int thread_id)
 {
-	cout << "crossOver start\n";
+	// cout << "crossOver start\n";
 	vector<int> child1, child2;
-	cout << __LINE__ << " = " << thread_id << endl;
 	// map of genes, checks if already are selected
 	map<int, int> genes1, genes2;
-
+	// cout << graph->V << endl;
+	// cout << parent1.size() << endl;
+	// cout << parent2.size() << endl;
+	
+//	cout << __LINE__ << " = " << thread_id << endl;
 	for(int i = 0; i < graph->V; i++)
 	{
 		// initially the genes not are used
 		genes1[parent1[i]] = 0;
 		genes2[parent2[i]] = 0;
 	}
-
+//	cout << __LINE__ << " = " << thread_id << endl;
 	// generates random points
 	int point1 = rand() % (graph->V - 1) + 1;
 	int point2 = rand() % (graph->V - point1) + point1;
+//	cout << __LINE__ << " = " << thread_id << endl;
+
 
 	// adjusts the points if they are equal
 	if(point1 == point2)
@@ -405,7 +410,7 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2, int thread_i
 				point2++;
 		}
 	}
-	cout << __LINE__ << " = " << thread_id << endl;
+//	cout << __LINE__ << " = " << thread_id << endl;
 	// generates childs
 
 	// until point1, child1 receives genes of the parent1
@@ -419,7 +424,7 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2, int thread_i
 		genes1[parent1[i]] = 1;
 		genes2[parent2[i]] = 1;
 	}
-	cout << __LINE__ << " = " << thread_id << endl;
+//	cout << __LINE__ << " = " << thread_id << endl;
 	// 	marks remaining genes
 	for(int i = point2 + 1; i < graph->V; i++)
 	{
@@ -450,7 +455,7 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2, int thread_i
 				}
 			}
 		}
-		cout << __LINE__ << " = " << thread_id << endl;
+//		cout << __LINE__ << " = " << thread_id << endl;
 		if(genes2[parent1[i]] == 0) // if the gene is not used
 		{
 			child2.push_back(parent1[i]);
@@ -470,7 +475,7 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2, int thread_i
 			}
 		}
 	}
-	cout << __LINE__ << " = " << thread_id << endl;
+//	cout << __LINE__ << " = " << thread_id << endl;
 	// ramaining genes: child1 receives genes of the parent1
 	// and child2 receives genes of the parent2
 	for(int i = point2 + 1; i < graph->V; i++)
@@ -478,7 +483,7 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2, int thread_i
 		child1.push_back(parent1[i]);
 		child2.push_back(parent2[i]);
 	}
-	cout << __LINE__ << " = " << thread_id << endl;
+//	cout << __LINE__ << " = " << thread_id << endl;
 	// mutation
 	int mutation = rand() % 100 + 1; // random number in [1,100]
 	if(mutation <= mutation_rate) // checks if the random number <= mutation rate
@@ -499,15 +504,15 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2, int thread_i
 		child2[index_gene1] = child2[index_gene2];
 		child2[index_gene2] = aux;
 	}
-	cout << __LINE__ << " = " << thread_id << endl;
+////	cout << __LINE__ << " = " << thread_id << endl;
 	int total_cost_child1 = isValidSolution(child1);
 	int total_cost_child2 = isValidSolution(child2);
-	cout << __LINE__ << " = " << thread_id << endl;
+////	cout << __LINE__ << " = " << thread_id << endl;
 	// checks if is a valid solution and not exists in the population
 	if(total_cost_child1 != -1 && !existsChromosome(child1, thread_id))
 	{
 		// add child in the population
-		insertBinarySearch(child1, total_cost_child1); // uses binary search to insert
+		insertBinarySearch(child1, total_cost_child1, thread_id); // uses binary search to insert
 		real_size_population[thread_id]++; // increments the real_size_population
 	}
 
@@ -519,7 +524,8 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2, int thread_i
 		insertBinarySearch(child2, total_cost_child2, thread_id); // uses binary search to insert
 		real_size_population[thread_id]++; // increments the real_size_population
 	}
-	cout << "crossOver end\n";
+	// cout << "crossOver end\n";
+	// showPopulation(thread_id);
 }
 
 
@@ -527,19 +533,16 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2, int thread_i
 void Genetic::run(int thread_id)
 {
 	cout<<"Thead number "<<thread_id<<" is running rn!!\n";
-	
-	auto my_population = th_population[thread_id];
-	cout<<my_population[0].second<<endl; // what is this ?
 	auto n_generation = generations/num_proc;
 	// cout<<"Hello1: "<<n_generation;
-	auto my_max_size_population = (2*size_population)/num_proc; // <==== see best value for this 
+	auto my_max_size_population = (size_population)/num_proc; // <==== see best value for this 
 	if(real_size_population[thread_id] == 0)
 		return;
 
 	for(int i = 0; i < n_generation; i++)
 	{
 		int  old_size_population = real_size_population[thread_id];
-		cout<< __LINE__  << "("<< thread_id << ") i = " << i << "real_size_population[thread_id] = " << real_size_population[thread_id] << ", my_max_size_population = " << my_max_size_population  << "\n";
+//		cout<< __LINE__  << "thread_id = "<< thread_id << " , i = " << i << ", Real_size_population[thread_id] = " << real_size_population[thread_id] << ", my_max_size_population = " << my_max_size_population  << "\n";
 
 		/* selects two parents (if exists) who will participate
 			of the reproduction process */
@@ -548,9 +551,9 @@ void Genetic::run(int thread_id)
 			if(real_size_population[thread_id] == 2)
 			{
 				// applying crossover in the parents
-				cout<< __LINE__ <<"\n";
-				crossOver(my_population[0].first, my_population[1].first, thread_id);
-				cout<< __LINE__ <<"\n";
+//				cout<< __LINE__ <<"\n";
+				crossOver(th_population[thread_id][0].first, th_population[thread_id][1].first, thread_id);
+//				cout<< __LINE__ <<"\n";
 			}
 			else
 			{
@@ -563,25 +566,25 @@ void Genetic::run(int thread_id)
 					parent1 = rand() % real_size_population[thread_id];
 					parent2 = rand() % real_size_population[thread_id];
 				}while(parent1 == parent2);
-				cout<< __LINE__ <<"\n";
+//				cout<< __LINE__ <<" " << parent1 << " "<< parent2 << " "<< th_population[thread_id].size() << " " << real_size_population[thread_id] << "\n";
 				// applying crossover in the two parents
-				crossOver(my_population[parent1].first, my_population[parent2].first, thread_id);
-				cout<< __LINE__ <<"\n";
+				crossOver(th_population[thread_id][parent1].first, th_population[thread_id][parent2].first, thread_id);
+//				cout<< __LINE__ <<"\n";
 			}
 
-			// gets difference to check if the my_population grew
+			// gets difference to check if the th_population[thread_id] grew
 			int diff_population = real_size_population[thread_id] - old_size_population;
 
 			if(diff_population == 2)
 			{
 				if(real_size_population[thread_id] > my_max_size_population)
 				{
-					// removes the two worst parents of the my_population
+					// removes the two worst parents of the th_population[thread_id]
 					// This helps in converging of values
-					cout<< __LINE__ <<"\n";
-					my_population.pop_back();
-					my_population.pop_back();
-					cout<< __LINE__ <<"\n";
+//					cout<< __LINE__ <<"\n";
+					th_population[thread_id].pop_back();
+					th_population[thread_id].pop_back();
+//					cout<< __LINE__ <<"\n";
 					// decrements the real_size_population[thread_id] in 2 units
 					real_size_population[thread_id] -= 2;
 				}
@@ -590,44 +593,44 @@ void Genetic::run(int thread_id)
 			{
 				if(real_size_population[thread_id] > my_max_size_population)
 				{
-					cout<< __LINE__ <<"\n";
-					my_population.pop_back(); // removes the worst parent of the my_population
+//					cout<< __LINE__ <<"\n";
+					th_population[thread_id].pop_back(); // removes the worst parent of the th_population[thread_id]
 					real_size_population[thread_id]--; // decrements the real_size_population[thread_id] in the unit
-					cout<< __LINE__ <<"\n";
+//					cout<< __LINE__ <<"\n";
 				}
 			}
 		}
-		else // my_population contains only 1 parent
+		else // th_population[thread_id] contains only 1 parent
 		{
 			// applying crossover in the parent
-			cout<< __LINE__ <<"\n";
-			crossOver(my_population[0].first, my_population[0].first, thread_id);
-			cout<< __LINE__ <<"\n";
+//			cout<< __LINE__ <<"\n";
+			crossOver(th_population[thread_id][0].first, th_population[thread_id][0].first, thread_id);
+//			cout<< __LINE__ <<"\n";
 			if(real_size_population[thread_id] > my_max_size_population)
 			{
-				cout<< __LINE__ <<"\n";
-				my_population.pop_back(); // removes the worst parent of the my_population
+//				cout<< __LINE__ <<"\n";
+				th_population[thread_id].pop_back(); // removes the worst parent of the th_population[thread_id]
 				real_size_population[thread_id]--; // decrements the real_size_population[thread_id] in the unit
-				cout<< __LINE__ <<"\n";
+//				cout<< __LINE__ <<"\n";
 			}
 		}
 	}
-	cout<< __LINE__ <<"\n";
-	// if(show_population == true)
-	// 	showPopulation(); // shows the my_population
+//	cout<< __LINE__ <<"\n";
+	if(show_population == true)
+		showPopulation(thread_id); // shows the th_population[thread_id]
 
 
-	// cout<< __LINE__ << "\n";
-	// result.push_back(my_population[0]);
+//	cout<< __LINE__ << "\n";
+	result.push_back(th_population[thread_id][0]);
 
 
 
 	// cout << "\nBest solution: ";
-	// const vector<int>& vec = my_population[0].first;
+	// const vector<int>& vec = th_population[thread_id][0].first;
 	// for(int i = 0; i < graph->V; i++)
 	// 	cout << vec[i] << " ";
 	// cout << graph->initial_vertex;
-	// cout << " | Cost: " << my_population[0].second;
+	// cout << " | Cost: " << th_population[thread_id][0].second;
 }
 
 
