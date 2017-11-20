@@ -49,9 +49,10 @@ class Genetic
 private:
 	Graph* graph; // the graph
 	std::vector< my_pair > population; // each element is a pair: vector and total cost
-  	std::array< std::vector<my_pair>, num_proc> th_population;
+  	std::vector<my_pair> th_population[num_proc];
 	int size_population; // size of population
-	int real_size_population; // real size population
+	int real_size_population[num_proc]; // real size population
+	int main_pop_size;
 	int generations; // amount of generations
 	int mutation_rate; // mutation rate
 	bool show_population; // flag to show population
@@ -62,12 +63,17 @@ public:
 	Genetic(Graph* graph, int amount_population, int generations, int mutation_rate, bool show_population = true); // constructor
 	int isValidSolution(std::vector<int>& solution); // checks if a solution is valid
 	void showPopulation(); // shows population
-	void crossOver(std::vector<int>& parent1, std::vector<int>& parent2); // makes the crossover
-	void insertBinarySearch(std::vector<int>& child, int total_cost); // uses binary search to insert
+	void crossOver(std::vector<int>& parent1, std::vector<int>& parent2, int thread_id); // makes the crossover
+	void insertBinarySearch(std::vector<int>& child, int total_cost, int thread_id); // uses binary search to insert
 	void run(int thead_id); // runs genetic algorithm(Multi-threaded)
 	// void run();
 	int getCostBestSolution(); // returns cost of the best solution
-	bool existsChromosome(const std::vector<int> & v); // checks if exists the chromosome
+	bool existsChromosome(const std::vector<int> & v, int thread_id); // checks if exists the chromosome
+	bool existsChromosome(const std::vector<int> & v);
+	void insertBinarySearch(std::vector<int>& child, int total_cost);
+	void showPopulation(int thread_id);
+
+
 };
 
 #endif
