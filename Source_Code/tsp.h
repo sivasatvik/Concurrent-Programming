@@ -56,10 +56,11 @@ private:
 	int generations; // amount of generations
 	int mutation_rate; // mutation rate
 	bool show_population; // flag to show population
+	std::vector<my_pair> result;
 private:
 	void initialPopulation(); // generates the initial population
 public:
-	std::vector<my_pair> result;
+	void getResult();
 	Genetic(Graph* graph, int amount_population, int generations, int mutation_rate, bool show_population = true); // constructor
 	int isValidSolution(std::vector<int>& solution); // checks if a solution is valid
 	void showPopulation(); // shows population

@@ -253,11 +253,11 @@ void Genetic::initialPopulation() // generates the initial population
 	for(int o=0;o<num_proc;o++)
 	{
 		real_size_population[o] = th_population[o].size();
-		cout << "Initial Thread Populations \n";
-		showPopulation(o);
+		// cout << "Initial Thread Populations \n";
+		// showPopulation(o);
 	}
 	cout << "\n";
-	showPopulation();
+	// showPopulation();
 
 
 
@@ -616,8 +616,8 @@ void Genetic::run(int thread_id)
 		}
 	}
 //	cout<< __LINE__ <<"\n";
-	if(show_population == true)
-		showPopulation(thread_id); // shows the th_population[thread_id]
+	// if(show_population == true)
+	showPopulation(thread_id); // shows the th_population[thread_id]
 
 
 //	cout<< __LINE__ << "\n";
@@ -723,6 +723,25 @@ void Genetic::run(int thread_id)
 // 	cout << " | Cost: " << population[0].second;
 // }
 
+
+void Genetic::getResult(){
+	cout<<"\nBest solutions: \n";
+	for(int i = 0; i<num_proc; i++){
+		const vector<int>& vec = result[i].first;
+		for(int j = 0; j<graph->V; j++){
+			cout<<vec[j]<<" ";
+		}
+		cout<<"   |  Cost: "<<result[i].second<<endl;
+	}
+	sort(result.begin(), result.end(), sort_pred());
+
+	cout << "\n\n\nBest solution: ";
+	const vector<int>& vec = result[0].first;
+	for(int i = 0; i < graph->V; i++)
+		cout << vec[i] << " ";
+	// cout << graph->initial_vertex;
+	cout << " | Cost: " << result[0].second;
+}
 
 
 

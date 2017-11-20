@@ -25,7 +25,10 @@ int main()
 	}
 
 	for(auto &th : threads) th.join();
-		
+
+	genetic.getResult();
+
+	
 	const clock_t begin_time = clock(); // gets time
 	// genetic.run(); // runs the genetic algorithm
   // genetic1.run();
