@@ -256,7 +256,7 @@ void Genetic::initialPopulation() // generates the initial population
 		// cout << "Initial Thread Populations \n";
 		// showPopulation(o);
 	}
-	cout << "\n";
+	cout<<"----------------------------------------------------------------------------------------------";
 	// showPopulation();
 
 
@@ -532,10 +532,12 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2, int thread_i
 // runs the genetic algorithm (Multi-threaded)
 void Genetic::run(int thread_id)
 {
-	cout<<"Thead number "<<thread_id<<" is running rn!!\n";
-	auto n_generation = generations/num_proc;
+
+	// cout<<"Thead number "<<thread_id<<" is running rn!!\n";
+	auto n_generation = (generations *3) / num_proc;
+	// auto n_generation = generations;
 	// cout<<"Hello1: "<<n_generation;
-	auto my_max_size_population = (size_population)/num_proc; // <==== see best value for this 
+	int my_max_size_population = (1.5 * size_population)/num_proc; // <==== see best value for this 
 	if(real_size_population[thread_id] == 0)
 		return;
 
@@ -565,6 +567,8 @@ void Genetic::run(int thread_id)
 					// select two random parents
 					parent1 = rand() % real_size_population[thread_id];
 					parent2 = rand() % real_size_population[thread_id];
+					auto temp1 = population[parent1];
+					auto temp2 = population[parent2];					
 				}while(parent1 == parent2);
 //				cout<< __LINE__ <<" " << parent1 << " "<< parent2 << " "<< th_population[thread_id].size() << " " << real_size_population[thread_id] << "\n";
 				// applying crossover in the two parents
@@ -617,7 +621,7 @@ void Genetic::run(int thread_id)
 	}
 //	cout<< __LINE__ <<"\n";
 	// if(show_population == true)
-	showPopulation(thread_id); // shows the th_population[thread_id]
+	// showPopulation(thread_id); // shows the th_population[thread_id]
 
 
 //	cout<< __LINE__ << "\n";
@@ -725,22 +729,30 @@ void Genetic::run(int thread_id)
 
 
 void Genetic::getResult(){
-	cout<<"\nBest solutions: \n";
-	for(int i = 0; i<num_proc; i++){
-		const vector<int>& vec = result[i].first;
-		for(int j = 0; j<graph->V; j++){
-			cout<<vec[j]<<" ";
-		}
-		cout<<"   |  Cost: "<<result[i].second<<endl;
-	}
+	// cout<<"\nBest solutions: \n";
+	// for(int i = 0; i<num_proc; i++){
+	// 	const vector<int>& vec = result[i].first;
+	// 	for(int j = 0; j<graph->V; j++){
+	// 		cout<<vec[j]<<" ";
+	// 	}
+	// 	cout<<"   |  Cost: "<<result[i].second<<"\n\n";
+	// }
 	sort(result.begin(), result.end(), sort_pred());
 
-	cout << "\n\n\nBest solution: ";
+	cout << "\nBest solution: ";
 	const vector<int>& vec = result[0].first;
 	for(int i = 0; i < graph->V; i++)
 		cout << vec[i] << " ";
 	// cout << graph->initial_vertex;
 	cout << " | Cost: " << result[0].second;
+
+	ofstream file;
+	file.open("Multi-threaded_1.csv",ios::out | ios::app);
+	file<<"\n"<<N<<","<<SEED<<","<<POP<<","<<C<<","<<result[0].second<<",";
+	for(int i = 0; i < graph->V; i++)
+		file << vec[i] << " ";
+
+	file.close();
 }
 
 

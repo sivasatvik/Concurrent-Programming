@@ -9,8 +9,10 @@
 #include <stdlib.h> // srand, rand
 #include <thread>
 #include <atomic>
+#include <sys/time.h>
+#include <fstream>
 
-#define num_proc 4
+#define num_proc N
 
 
 // class that represents the graph
