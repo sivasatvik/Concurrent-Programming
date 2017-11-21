@@ -22,6 +22,7 @@
 \newcommand{\horrule}[1]{\rule{\linewidth}{#1}} 	% Horizontal rule
 
 \title{
+	%\vspace{75px}
 	\horrule{0.5pt} \\[0.5cm]
 	\huge Travelling Salesman Problem \\
 	\horrule{2pt} \\[0.5cm]
@@ -36,10 +37,10 @@
 \date{}
 
 \begin{document}
-\vspace{100pt}
+\vspace{5cm}
 \maketitle
 
-\vspace{80pt}
+%\vspace{80pt}
 %\section*{Introduction}
 	\subsection*{Problem}
 		\begin{center}
@@ -47,7 +48,7 @@
 		\end{center} 
 		\subsection*{Abstract}
 Travelling Salesman Problem falls under \textbf{NP complete} class of problems. Thus, there is no \textbf{polymnomial time} algorithm known till now that solves this problem.\newline\newline
-The TSP has many applications such as planning, logistics and the manufacture of \textbf{microchips}, also is a sub-problem in \textbf{DNA sequencing}. This is also used in astronomy, as astronomers observing many sources will want to minimize the time spent moving the telescope between the sources.\newline\newline So, in this report, we present two exitsting algorithms for \textbf{TSP}. They are: 
+The TSP has many applications such as  logistics, planning and the manufacture of \textbf{microchips}, also is also a sub-problem in \textbf{DNA sequencing}. This is also used in astronomy, as astronomers observing many sources will want to minimize the time spent moving the telescope between the sources.\newline\newline So, in this report, we present two exitsting algorithms for \textbf{TSP}. They are: 
 	\begin{itemize}
 		\item Genetic Algorithm.
 		\item Brute Force
@@ -57,14 +58,16 @@ The TSP has many applications such as planning, logistics and the manufacture of
 \newpage 
 
 \section*{Genetic Algorithm}
-
-	As the brute force algorithm for this problem will give us a complexity of \textbf{$O(n!)$}, this algorithm approaches the problem in an interesting way. This algorithm can be divided into following sections:
+	Genetic algorithm is one of the popular techniques in CS to find complex solutions.
+	Genetic algorithems are based on concept of evolution.
+\par This algorithem chooses few arbitrary solutions and repeatedly performs optimizations on those solutions in hope to converge to the optimal solution. \newline 
+	As compared to the brute force algorithm which has a complexity of \textbf{$O(n!)$}, this algorithm performs quite well when it comes to real-world problems. This algorithm can be divided into following sections:
 	\begin{itemize}
-		\item Choosing few aribitrary solutions
-		\item \textit{"Breeding"} the chosen solutions 
-		\item Choosing the best out of the solutions in the above section.
+		\item Initializing with aribitrary solutions
+		\item Optimizing the initialized solutions(\textit{"Breeding"})
+		\item Choosing the best solutions from the above step.
 	\end{itemize}
-	This algorithm initially chooses random solutions for the given graph(done by the function \textbf{initialPopulation()}). It most certainly won't be an optimal solution. The number of solutions it chooses can be given as an input by the user(instructions in \textit{readme.txt}). This value, when at a lower, tends to give optimal solutions. After we get the solution set, we sort it according to their cost. And as we go ahead in the algorithm, this set essentially will contain the best solutions for the problem. And the top of this set will have the most optimal solution. \newline
+	This algorithm initially chooses \textit{n} random solutions for the given graph(done by the function \textbf{initialPopulation()}). It most certainly won't be an optimal solution. The number of solutions it chooses can be given as an input by the user(instructions in \textit{readme.txt}). This value, when at a lower, tends to give optimal solutions. After we get the solution set, we sort it according to their cost. And as we go ahead in the algorithm, this set essentially will contain the best solutions for the problem. And the top of this set will have the most optimal solution. \newline
 	\newline Now, after we get the set of solutions for the problems(not necessarily optimal ones), we randomly choose two of the solutions from the above set and apply what we call \textbf{crossOver()} on them. This is essentially breeding the two chosen solutions. How this works is given as follows, 
 	\begin{lstlisting}
 Example:
@@ -82,19 +85,28 @@ Example:
 	\end{lstlisting}
 	Here, let's introduce the concept of \textbf{genes}. These are essentially the vertices that are inherited by the children from the two parents we chose to breed.\newline
 	\newline We will have two random points, one of them less than the other, and in the range of number of vertices in the graph. Now, for each child, we innherit genes from their respective parents from start till first point and from second point till the end. For the middle part, as shown above, we inherit genes from the other parent in reverse order. This goes for both of the chidren inheriting. The children we get in this might or might not be the solutions for the problem, hence, we check them before adding them to the set of solutions we are forming. After we see that the children we got are indeed the solutions for the problem, we insert them in the set we created above, using binary search. This ensure the property of  the sortedness of the set. Everytime we insert into the set, we discard the bottom most solution for the problem since it clearly is not an optimal solution i.e. in a sorted set, the bottom most solution is the worst, hence we remove it.
-	\newline \newline We do the above mentioned \textit{\textbf{breeding}} user defined amount of times(taken care by the function \textbf{run()}). Here, we introduce the concept of \textit{\textbf{generations}}. This is essentially, how many times do you want to breed the solution set we got to get the optimal solution. This is analogous to the real life human genetic lineage. Hence the name \textbf{Genetic Algorithm.}
-	\subsection*{Multi-threading}
+	\newline \newline We do the above mentioned \textit{\textbf{breeding}} user defined amount of times(taken care by the function \textbf{run()}). Here, we introduce the concept of \textit{\textbf{generations}}. This is essentially, how many times do you want to breed the solution set we got, to get the optimal solution. This is analogous to the real life human genetic lineage. Hence the name \textbf{Genetic Algorithm.}
+	\subsection*{Parallelizing Genetic Algorithm}
 	 Analysing the above approach, we reached to the conclusion that a lot of overhead we are getting is when the algorithm is running the breeding said number of times(on a scale of 1000) and attempted to parallelize that and sure enough, we saw good results from doing that. Obvioulsy, we couldn't just parallelize the loop for breeding as there are insertions and deletions and readings in the solution set by different threads which will lead to invalidation of the correctness of the algoritm. Hence, we approached the problem of parallelizing it in a different way. We tried the following approaches.
 	 \begin{itemize}
 	 	\item Introducing mutex/shared locks
 	 	\item Each thread computing on it's own to find the best result and among the results, getting the best one. 
 	 \end{itemize}
 	 We tried various ways of introducing mutex locks and shared locks but none of them seemed to give good results as the overhead for achieving the locks is accountable as the solution set is being accessed a good amount of times. We couldn't get good results using this method, hence we implemented the below algorithm.
-	 \newline \newline Coming the second method, since anyway we have a number of threads, we thought what if we make each thread compute it's own solution set and give us its best result and among the best results of all the threads, we get the very best one? And surely this approach fetched us good results. So in this implementation, each thread has it's own solution set and will work on that solution set to get optimal results. Essentially, we will be parallelizing the \textbf{run()} function.
+	 
+	 \begin{figure}[h]
+		\centering
+  		\includegraphics[scale=0.25]{i1}
+  		\caption{Work distribution for threads}
+	\end{figure}
+	\begin{center}
+	 The above figure shows the algorithm used, in a picturized way.
+	 \end{center}
+	 Since anyway we have a number of threads, we thought what if we make each thread compute it's own solution set and give us its best result and among the best results of all the threads, we get the very best one? And surely this approach fetched us good results. So in this implementation, each thread has it's own solution set and will work on that solution set to get optimal results. Essentially, we will be parallelizing the \textbf{run()} function.
 	 \newline The above mentioned algorithm is \textbf{Lock-free} and \textbf{Wait-free} implementation for the threads.
 	 \newline
 	 Taking into account the number of processors on the CPU, we gave 4 and 8 threads for testing of the algorithm. 
-	 \newpage
+	 %\newpage
 	 \subsection*{Results}
 	 \begin{center}
 	 \textbf{\textit{generations = 1000}}
