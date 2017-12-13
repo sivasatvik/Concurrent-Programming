@@ -14,14 +14,45 @@ Graph::Graph(int V, int initial_vertex, bool random_graph) // constructor of Gra
 		exit(1);
 	}
 
-	this->V = V; // assigns the number of vertices
+	this->V = 4; // assigns the number of vertices
 	this->initial_vertex = initial_vertex; // assigns initial vertex
 	this->total_edges = 0; // initially the total of edges is 0
 
+
+	
+	manualGraph();
+	showGraph();
+	cout << "\n\n";
 	// if 3rd argument is true
-	if(random_graph)
-		generatesGraph();
+	// if(random_graph)
+	// 	generatesGraph();
+	floydWarshall();
+	showGraph();
+	cout << "\n\n";
+
 }
+
+void Graph::manualGraph()
+{
+
+	vector<int> vec;
+	for(int i = 0; i < V; i++)
+		vec.push_back(i);
+	initial_vertex = vec[0];
+	addEdge(0, 1, 10);
+	addEdge(0, 2, 10);
+	addEdge(1, 0, 10);
+	addEdge(2, 0, 10);
+	addEdge(2, 1, 1000);
+	addEdge(1, 2, 1000);
+	addEdge(3, 1, 1000);
+	addEdge(1, 3, 1000);
+	addEdge(3, 2, 10);
+	addEdge(2, 3, 10);
+	return;
+}
+
+
 
 
 
@@ -69,6 +100,7 @@ void Graph::generatesGraph()
 			addEdge(vec[dest], vec[src], weight);
 		}
 	}
+
 }
 
 // Prints info about graph (i.e  V, num_edges )
@@ -85,8 +117,6 @@ void Graph::addEdge(int src, int dest, int weight) // add a edge
 {
 	map_edges[make_pair(src, dest)] = weight; // adds edge in the map
 }
-
-
 
 // Print graph
 void Graph::showGraph() // shows all connections of the graph
@@ -156,7 +186,10 @@ int Genetic::isValidSolution(vector<int>& solution)
 
 			// checks if exists connection
 			if(cost == -1)
+			{
+				cout << __LINE__ << " " << cost << " " << solution[i] << " " << solution[i+1] << endl; 
 				return -1;
+			}
 			else
 				total_cost += cost;
 		}
@@ -166,12 +199,17 @@ int Genetic::isValidSolution(vector<int>& solution)
 
 			// checks if exists connection
 			if(cost == -1)
+			{
+				cout << __LINE__ << " " << solution[i] << " " << solution[0]<< " " << cost << endl; 
 				return -1;
+			}
 			else
 				total_cost += cost;
 			break;
 		}
 	}
+
+
 	return total_cost;
 }
 
@@ -230,8 +268,8 @@ void Genetic::initialPopulation() // generates the initial population
 		random_shuffle(parent.begin() + 1, parent.begin() + (rand() % (graph->V - 1) + 1));
 
 		int total_cost = isValidSolution(parent); // checks if solution is valid
-
-		// checks if permutation is a valid solution and if not exists
+		// cout << __LINE__ << " " << total_cost << endl;
+ 		// checks if permutation is a valid solution and if not exists
 		if(total_cost != -1 && !existsChromosome(parent))
 		{
 			population.push_back(make_pair(parent, total_cost)); // add in population
@@ -608,9 +646,8 @@ void Genetic::run(int thread_id)
 
 // Gets each threads result and print minimum
 void Genetic::getResult(){
-	sort(result.begin(), result.end(), sort_pred());
-
 	cout << "\nBest solution: ";
+	sort(result.begin(), result.end(), sort_pred());
 	const vector<int>& vec = result[0].first;
 	for(int i = 0; i < graph->V; i++)
 		cout << vec[i] << " ";
@@ -633,4 +670,60 @@ int Genetic::getCostBestSolution()
 	if(real_size_population > 0)
 		return population[0].second;
 	return -1;
+}
+
+
+
+//__________________________________________________________________________________________________
+// Extra functions added here
+
+void Graph::floydWarshall()
+{
+	int i, j, k;
+	int dist[V][V] = {10000};
+	for(i = 0; i < V; i++)
+	{
+		for(j = 0; j < V; j++)
+		{
+			if(existsEdge(i,j) != -1)
+			{
+				dist[i][j] = map_edges[make_pair(i, j)];
+				cout << __LINE__ << " " << i << " " << j <<  " " << dist[i][j] << endl;
+			}
+			else
+			{
+				if(i == j)
+				{
+					dist[i][j] = 0;
+				}
+				else
+					dist[i][j] = 10000; // INFINITY ACTUALLY
+				cout <<  __LINE__ << " " << i << " " << j << " " << dist[i][j] << endl;
+			}
+			inbetween_vert[make_pair(i, j)] = "";
+		}
+	}
+	for(k = 0; k < V; k++)
+	{
+		for(i = 0; i < V; i++)
+		{
+			for(j = 0; j < V; j++)
+			{
+				if(dist[i][k] + dist[k][j] < dist[i][j])
+				{
+					inbetween_vert[make_pair(i, j)] += k;
+					dist[i][j] = dist[i][k] + dist[k][j];
+				}
+			}
+		}
+	}
+	for(i = 0; i < V; i++)
+	{
+		for(j = 0; j < V; j++)
+		{
+			if(i != j)
+				map_edges[make_pair(i, j)] = dist[i][j];
+		}
+	}
+
 }
