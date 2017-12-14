@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm> // sort, next_permutation
 #include "tsp.h"
+#include <cstdlib>
 using namespace std;
 
 
@@ -27,7 +28,7 @@ Graph::Graph(int V, int initial_vertex, bool random_graph) // constructor of Gra
 	// if(random_graph)
 	// 	generatesGraph();
 	floydWarshall();
-	showGraph();
+	// showGraph();
 	cout << "\n\n";
 
 }
@@ -40,15 +41,18 @@ void Graph::manualGraph()
 		vec.push_back(i);
 	initial_vertex = vec[0];
 	addEdge(0, 1, 10);
-	addEdge(0, 2, 10);
 	addEdge(1, 0, 10);
-	addEdge(2, 0, 10);
-	addEdge(2, 1, 1000);
-	addEdge(1, 2, 1000);
-	addEdge(3, 1, 1000);
-	addEdge(1, 3, 1000);
-	addEdge(3, 2, 10);
-	addEdge(2, 3, 10);
+	addEdge(0, 2, 20);
+	// addEdge(2, 0, 10);
+	addEdge(1, 2, 200);
+	// addEdge(2, 1, 1000);
+	addEdge(3, 1, INF);
+	// addEdge(3, 1, 1000);
+	addEdge(2, 3, 100);
+	// addEdge(3, 2, 10);
+	addEdge(0, 3, 30);
+	addEdge(3, 0, 30);
+	// addEdge(2, 3, 100);
 	return;
 }
 
@@ -133,7 +137,9 @@ int Graph::existsEdge(int src, int dest) // checks if exists a edge
 
 	if(it != map_edges.end())
 		return it->second; // returns cost
-	return -1;
+
+	// cout <<   __LINE__  << " -->  " <<  it->second <<  " " << src << " " << dest << endl;
+	return 0;
 }
 
 
@@ -182,34 +188,14 @@ int Genetic::isValidSolution(vector<int>& solution)
 	{
 		if(i + 1 <  graph->V)
 		{
-			int cost = graph->existsEdge(solution[i], solution[i+1]);
-
-			// checks if exists connection
-			if(cost == -1)
-			{
-				cout << __LINE__ << " " << cost << " " << solution[i] << " " << solution[i+1] << endl; 
-				return -1;
-			}
-			else
-				total_cost += cost;
+			total_cost += graph->existsEdge(solution[i], solution[i+1]);
 		}
 		else
 		{
-			int cost = graph->existsEdge(solution[i], solution[0]);
-
-			// checks if exists connection
-			if(cost == -1)
-			{
-				cout << __LINE__ << " " << solution[i] << " " << solution[0]<< " " << cost << endl; 
-				return -1;
-			}
-			else
-				total_cost += cost;
+			total_cost += graph->existsEdge(solution[i], solution[0]);
 			break;
 		}
 	}
-
-
 	return total_cost;
 }
 
@@ -278,14 +264,16 @@ void Genetic::initialPopulation() // generates the initial population
 		}
 		if(main_pop_size == size_population) // checks size population
 		{
-			
 			break;
 		}
 	}
 
 	// checks if main_pop_size is 0
 	if(main_pop_size == 0)
+	{
 		cout << "\nEmpty initial population ;( Try again\n";
+		exit(0); // successfull exit
+	}
 	else
 		sort(population.begin(), population.end(), sort_pred()); // sort population
 	int i = 0;
@@ -305,7 +293,7 @@ void Genetic::initialPopulation() // generates the initial population
 		// cout << "Initial Thread Populations \n";
 		// showPopulation(o);
 	}
-	cout<<"----------------------------------------------------------------------------------------------";
+	cout<<"----------------------------------------------------------------------------------------------\n";
 	// showPopulation();
 }
 
@@ -564,11 +552,13 @@ void Genetic::crossOver(vector<int>& parent1, vector<int>& parent2, int thread_i
 // runs the genetic algorithm (Multi-threaded)
 void Genetic::run(int thread_id)
 {
-
-	// cout<<"Thead number "<<thread_id<<" is running rn!!\n";
+	// graph->showGraph();
 	auto n_generation = (generations *3) / num_proc;
+	cout<<"Thead number "<<thread_id<<" is running!!\n";
 	// auto n_generation = generations;
 	// cout<<"Hello1: "<<n_generation;
+	// cout << __LINE__ << " " << population[0].second << " " <<  population[1].second << "\n";
+	// cout << __LINE__ << " " <<  real_size_population[thread_id] << "\n";
 	int my_max_size_population = (1.5 * size_population)/num_proc; // <==== see best value for this 
 	if(real_size_population[thread_id] == 0)
 		return;
@@ -579,15 +569,18 @@ void Genetic::run(int thread_id)
 
 		/* selects two parents (if exists) who will participate
 			of the reproduction process */
+		// cout << __LINE__ << "\n";
 		if(real_size_population[thread_id] >= 2)
 		{
 			if(real_size_population[thread_id] == 2)
 			{
+				// cout << __LINE__ << " " <<  real_size_population[thread_id] << "\n";
 				// applying crossover in the parents
 				crossOver(th_population[thread_id][0].first, th_population[thread_id][1].first, thread_id);
 			}
 			else
 			{
+				// cout << __LINE__ << " " << real_size_population[thread_id] << "\n";
 				// real_size_population[thread_id] > 2
 				int parent1, parent2;
 				do
@@ -596,19 +589,25 @@ void Genetic::run(int thread_id)
 					// select two random parents
 					parent1 = rand() % real_size_population[thread_id];
 					parent2 = rand() % real_size_population[thread_id];
-					auto temp1 = population[parent1];
-					auto temp2 = population[parent2];					
+					// cout << __LINE__ << " " << parent1 << "\n";
+					// auto temp1 = population[parent1]; // what error is this ??
+					// cout << __LINE__ << " " << parent2 << "\n";
+					// auto temp2 = population[parent2];					
 				}while(parent1 == parent2);
 				// applying crossover in the two parents
+				// cout << __LINE__ << "\n";
 				crossOver(th_population[thread_id][parent1].first, th_population[thread_id][parent2].first, thread_id);
 			}
 
 			// gets difference to check if the th_population[thread_id] grew
 			int diff_population = real_size_population[thread_id] - old_size_population;
+			// cout << th_population[thread_id][0].second << endl;
 			if(diff_population == 2)
 			{
+				// cout << __LINE__ << " " << my_max_size_population <<"\n";
 				if(real_size_population[thread_id] > my_max_size_population)
 				{
+					// cout << __LINE__ << "\n";
 					// removes the two worst parents of the th_population[thread_id]
 					// This helps in converging of values
 					th_population[thread_id].pop_back();
@@ -619,8 +618,10 @@ void Genetic::run(int thread_id)
 			}
 			else if(diff_population == 1)
 			{
+				// cout << __LINE__ << "\n";
 				if(real_size_population[thread_id] > my_max_size_population)
 				{
+					// cout << __LINE__ << "\n";
 					th_population[thread_id].pop_back(); // removes the worst parent of the th_population[thread_id]
 					real_size_population[thread_id]--; // decrements the real_size_population[thread_id] in the unit
 				}
@@ -628,10 +629,12 @@ void Genetic::run(int thread_id)
 		}
 		else // th_population[thread_id] contains only 1 parent
 		{
+			// cout << __LINE__ << "\n";
 			// applying crossover in the parent
 			crossOver(th_population[thread_id][0].first, th_population[thread_id][0].first, thread_id);
 			if(real_size_population[thread_id] > my_max_size_population)
 			{
+				// cout << __LINE__ << "\n";
 				th_population[thread_id].pop_back(); // removes the worst parent of the th_population[thread_id]
 				real_size_population[thread_id]--; // decrements the real_size_population[thread_id] in the unit
 			}
@@ -640,7 +643,7 @@ void Genetic::run(int thread_id)
 	// if(show_population == true)
 	// showPopulation(thread_id); // shows the th_population[thread_id]
 
-
+	// cout << __LINE__ << "\n";
 	result.push_back(th_population[thread_id][0]);
 }
 
@@ -649,11 +652,22 @@ void Genetic::getResult(){
 	cout << "\nBest solution: ";
 	sort(result.begin(), result.end(), sort_pred());
 	const vector<int>& vec = result[0].first;
-	for(int i = 0; i < graph->V; i++)
-		cout << vec[i] << " ";
+	for(int i = 0; i < graph->V; i+=2)
+	{
+		cout << vec[i];
+	    if(i != graph->V-1)
+	    {
+	    	cout << graph->inbetween_vert[make_pair(vec[i], vec[i+1])] << " ";
+		    cout << vec[i+1] << " ";
+		}
+	    else
+	    {
+	    	cout << graph->inbetween_vert[make_pair(vec[i], vec[0])] << " ";
+	        cout << vec[0] << " ";
+	    }
+	}
 	// cout << graph->initial_vertex;
 	cout << " | Cost: " << result[0].second;
-
 	ofstream file;
 	file.open("Multi-threaded_1.csv",ios::out | ios::app);
 	file<<"\n"<<N<<","<<SEED<<","<<POP<<","<<C<<","<<result[0].second<<",";
@@ -680,15 +694,14 @@ int Genetic::getCostBestSolution()
 void Graph::floydWarshall()
 {
 	int i, j, k;
-	int dist[V][V] = {10000};
+	int dist[V][V] = {INF};
 	for(i = 0; i < V; i++)
 	{
 		for(j = 0; j < V; j++)
 		{
-			if(existsEdge(i,j) != -1)
+			if(existsEdge(i,j) != 0)
 			{
 				dist[i][j] = map_edges[make_pair(i, j)];
-				cout << __LINE__ << " " << i << " " << j <<  " " << dist[i][j] << endl;
 			}
 			else
 			{
@@ -697,9 +710,10 @@ void Graph::floydWarshall()
 					dist[i][j] = 0;
 				}
 				else
-					dist[i][j] = 10000; // INFINITY ACTUALLY
-				cout <<  __LINE__ << " " << i << " " << j << " " << dist[i][j] << endl;
+					dist[i][j] = INF; // INFINITY ACTUALLY
 			}
+
+			// cout <<  __LINE__ << " " << i << " " << j << " " << dist[i][j] << endl;
 			inbetween_vert[make_pair(i, j)] = "";
 		}
 	}
@@ -711,7 +725,8 @@ void Graph::floydWarshall()
 			{
 				if(dist[i][k] + dist[k][j] < dist[i][j])
 				{
-					inbetween_vert[make_pair(i, j)] += k;
+					inbetween_vert[make_pair(i, j)] += " " + std::to_string(k);
+					// cout << inbetween_vert[make_pair(i, j)] << endl;
 					dist[i][j] = dist[i][k] + dist[k][j];
 				}
 			}
@@ -721,8 +736,13 @@ void Graph::floydWarshall()
 	{
 		for(j = 0; j < V; j++)
 		{
-			if(i != j)
+			if(i != j) 
+			{
 				map_edges[make_pair(i, j)] = dist[i][j];
+
+				// cout <<  __LINE__ << " " << i << " " << j << " " << dist[i][j] << endl;
+			}
+
 		}
 	}
 
