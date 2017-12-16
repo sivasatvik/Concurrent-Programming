@@ -20,15 +20,15 @@ Graph::Graph(int V, int initial_vertex, bool random_graph) // constructor of Gra
 	this->total_edges = 0; // initially the total of edges is 0
 
 
-	
-	manualGraph();
+	generatesGraph();
+	// manualGraph();
 	showGraph();
 	cout << "\n\n";
 	// if 3rd argument is true
 	// if(random_graph)
 	// 	generatesGraph();
 	floydWarshall();
-	// showGraph();
+	showGraph();
 	cout << "\n\n";
 
 }
@@ -68,6 +68,10 @@ void Graph::generatesGraph()
 	for(int i = 0; i < V; i++)
 		vec.push_back(i);
 
+	for(int i = 0; i < V; i++)
+		cout<<vec[i]<<" ";
+	cout<<endl;
+
 	// generates a random permutation of vertices
 	random_shuffle(vec.begin(), vec.end());
 
@@ -77,7 +81,7 @@ void Graph::generatesGraph()
 	// Connect all the edges of graph
 	for(i = 0; i <= V; i++)
 	{
-		weight = rand() % V + 1; // random weight in range [1,V]
+		weight = rand() % 100 + 1; // random weight in range [1,100]
 
 		if(i + 1 < V)
 			addEdge(vec[i], vec[i + 1], weight);
@@ -91,17 +95,30 @@ void Graph::generatesGraph()
 
 	int limit_edges = V * (V - 1); // calculates the limit of edges
 	int size_edges = rand() % (2 * limit_edges) + limit_edges;
+	cout<<size_edges<<endl;
 
 	// add some extra edges in graph
-	for(int i = 0; i < size_edges; i++)
+	for(int i = 0; i < 2*V; i++)
 	{
 		int src = rand() % V; // random source
 		int dest = rand() % V; // random destination
-		weight = rand() % V + 1; // random weight in range [1,V]
+		weight = rand() % 100 + 1; // random weight in range [1,100]
 		if(src != dest)
 		{
-			addEdge(vec[src], vec[dest], weight);
-			addEdge(vec[dest], vec[src], weight);
+			if(rand()%10>7){
+				weight = INF;
+				addEdge(vec[src], vec[dest], weight);
+			}
+			else{
+				addEdge(vec[src], vec[dest], weight);
+			}
+			if(rand()%10>7){
+				weight=INF;
+				addEdge(vec[dest], vec[src], weight);
+			}	
+			else{
+				addEdge(vec[dest], vec[src], weight);
+			}
 		}
 	}
 
