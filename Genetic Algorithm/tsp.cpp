@@ -15,7 +15,7 @@ Graph::Graph(int V, int initial_vertex, bool random_graph) // constructor of Gra
 		exit(1);
 	}
 
-	this->V = 4; // assigns the number of vertices
+	this->V = V; // assigns the number of vertices
 	this->initial_vertex = initial_vertex; // assigns initial vertex
 	this->total_edges = 0; // initially the total of edges is 0
 
