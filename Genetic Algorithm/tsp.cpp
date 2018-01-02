@@ -344,7 +344,7 @@ void Genetic::insertBinarySearch(vector<int>& child, int total_cost)
 	int imax = main_pop_size - 1;
 	for(forward_list<my_pair>::iterator it = population2.begin(); it != population2.end() ;  ++it)
 	{
-		if(total_cost == it.second)
+		if(total_cost <= it.second)
 		{
 			population2.insert_before(it, make_pair(child, total_cost));
 			return;	
@@ -531,21 +531,24 @@ void Genetic::run(int thread_id)
 	// auto n_generation = generations;
 	// cout<<"Hello1: "<<n_generation;
 	int my_max_size_population = (1.5 * size_population)/num_proc; // <==== see best value for this 
-	if(real_size_population[thread_id] == 0)
+	if(real_size_population == 0)
 		return;
 
 	for(int i = 0; i < n_generation; i++)
 	{
-		int  old_size_population = real_size_population[thread_id];
+		int  old_size_population = real_size_population;
 
 		/* selects two parents (if exists) who will participate
 			of the reproduction process */
-		if(real_size_population[thread_id] >= 2)
+		if(real_size_population >= 2)
 		{
-			if(real_size_population[thread_id] == 2)
+			if(real_size_population == 2)
 			{
 				// applying crossover in the parents
-				crossOver(th_population[thread_id][0].first, th_population[thread_id][1].first, thread_id);
+				forward_list<my_pair>::iterator it = population2.begin();
+				auto first_elem = it;
+				auto second_elem = it++;
+				crossOver(first_elem.first, second_elem.first);
 			}
 			else
 			{
@@ -553,56 +556,65 @@ void Genetic::run(int thread_id)
 				int parent1, parent2;
 				do
 				{
-
 					// select two random parents
-					parent1 = rand() % real_size_population[thread_id];
-					parent2 = rand() % real_size_population[thread_id];
-					auto temp1 = population[parent1];
-					auto temp2 = population[parent2];					
+					parent1 = rand() % real_size_population;
+					parent2 = rand() % real_size_population;
 				}while(parent1 == parent2);
 				// applying crossover in the two parents
-				crossOver(th_population[thread_id][parent1].first, th_population[thread_id][parent2].first, thread_id);
+				auto parent1_elem  =  population2.begin().first;
+				auto parent2_elem  =  population2.begin().first;
+				int maximum_parent = (parent1 > parent2) ? parent1 : parent2;
+				forward_list<my_pair>::iterator it = population2.begin();
+				for(int count = 0; count <= maximum_parent; count++, ++it)
+				{
+					if(count == parent1)
+					{
+						parent1_elem = it.first;
+					}
+					if(count == parent2)
+					{
+						parent2_elem = it.first;
+					}
+				}
+				crossOver(parent1_elem, parent2_elem);
 			}
 
 			// gets difference to check if the th_population[thread_id] grew
-			int diff_population = real_size_population[thread_id] - old_size_population;
+			int diff_population = real_size_population - old_size_population;
 			if(diff_population == 2)
 			{
-				if(real_size_population[thread_id] > my_max_size_population)
+				if(real_size_population > my_max_size_population)
 				{
 					// removes the two worst parents of the th_population[thread_id]
 					// This helps in converging of values
-					th_population[thread_id].pop_back();
-					th_population[thread_id].pop_back();
+					population2.pop_front();
+					population2.pop_front();
 					// decrements the real_size_population[thread_id] in 2 units
-					real_size_population[thread_id] -= 2;
+					real_size_population -= 2;
 				}
 			}
 			else if(diff_population == 1)
 			{
-				if(real_size_population[thread_id] > my_max_size_population)
+				if(real_size_population > my_max_size_population)
 				{
-					th_population[thread_id].pop_back(); // removes the worst parent of the th_population[thread_id]
-					real_size_population[thread_id]--; // decrements the real_size_population[thread_id] in the unit
+					population2.pop_front(); // removes the worst parent of the th_population[thread_id]
+					real_size_population--; // decrements the real_size_population[thread_id] in the unit
 				}
 			}
 		}
 		else // th_population[thread_id] contains only 1 parent
 		{
 			// applying crossover in the parent
-			crossOver(th_population[thread_id][0].first, th_population[thread_id][0].first, thread_id);
-			if(real_size_population[thread_id] > my_max_size_population)
+			crossOver(population2.begin().first, population2.begin().first, thread_id);
+			if(real_size_population > my_max_size_population)
 			{
-				th_population[thread_id].pop_back(); // removes the worst parent of the th_population[thread_id]
-				real_size_population[thread_id]--; // decrements the real_size_population[thread_id] in the unit
+				population2.pop_front(); // removes the worst parent of the th_population[thread_id]
+				real_size_population--; // decrements the real_size_population[thread_id] in the unit
 			}
 		}
 	}
 	// if(show_population == true)
 	// showPopulation(thread_id); // shows the th_population[thread_id]
-
-
-	result.push_back(th_population[thread_id][0]);
 }
 
 // Gets each threads result and print minimum

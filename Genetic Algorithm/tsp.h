@@ -42,7 +42,7 @@ struct sort_pred
 {
 	bool operator()(const my_pair& firstElem, const my_pair& secondElem)
 	{
-		return firstElem.second < secondElem.second;
+		return firstElem.second > secondElem.second;
 	}
 };
 
@@ -58,7 +58,7 @@ private:
 	int size_population; // size of population
 	int main_pop_size;
 	int curr_pop_size;
-	int real_size_population[num_proc]; // real size population
+	int real_size_population; // real size population
 	int generations; // amount of generations
 	int mutation_rate; // mutation rate
 	bool show_population; // flag to show population
