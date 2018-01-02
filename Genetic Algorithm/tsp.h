@@ -11,6 +11,7 @@
 #include <atomic>
 #include <sys/time.h>
 #include <fstream>
+#include <forward_list>
 
 #define num_proc N
 
@@ -51,10 +52,13 @@ class Genetic
 private:
 	Graph* graph; // the graph
 	std::vector< my_pair > population; // each element is a pair: vector and total cost
+	std::forward_list<my_pair> population2;
+
   	std::vector<my_pair> th_population[num_proc];
 	int size_population; // size of population
-	int real_size_population[num_proc]; // real size population
 	int main_pop_size;
+	int curr_pop_size;
+	int real_size_population[num_proc]; // real size population
 	int generations; // amount of generations
 	int mutation_rate; // mutation rate
 	bool show_population; // flag to show population

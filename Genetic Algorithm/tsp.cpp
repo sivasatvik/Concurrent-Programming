@@ -191,7 +191,7 @@ bool Genetic::existsChromosome(const vector<int> & v, int thread_id)
 bool Genetic::existsChromosome(const vector<int> & v)
 {
 	// checks if exists in the population
-	for(vector<pair<vector<int>, int> >::iterator it=population.begin(); it!=population.end(); ++it)
+	for(forward_list<my_pair>::iterator it=population2.begin(); it!=population2.end(); ++it)
 	{
 		const vector<int>& vec = (*it).first; // gets the vector
 		if(equal(v.begin(), v.end(), vec.begin())) // compares vectors
@@ -219,7 +219,7 @@ void Genetic::initialPopulation() // generates the initial population
 
 	if(total_cost != -1) // checks if the parent is valid
 	{
-		population.push_back(make_pair(parent, total_cost)); // inserts in the population
+		population2.push_front(make_pair(parent, total_cost)); // inserts in the population
 			main_pop_size++; // increments main_pop_size
 	}
 
@@ -234,13 +234,12 @@ void Genetic::initialPopulation() // generates the initial population
 		// checks if permutation is a valid solution and if not exists
 		if(total_cost != -1 && !existsChromosome(parent))
 		{
-			population.push_back(make_pair(parent, total_cost)); // add in population
+			population2.push_front(make_pair(parent, total_cost)); // add in population
 			main_pop_size++; // increments main_pop_size in the unit
       // cout<<main_pop_size<<endl;
 		}
 		if(main_pop_size == size_population) // checks size population
 		{
-			
 			break;
 		}
 	}
@@ -249,18 +248,26 @@ void Genetic::initialPopulation() // generates the initial population
 	if(main_pop_size == 0)
 		cout << "\nEmpty initial population ;( Try again\n";
 	else
-		sort(population.begin(), population.end(), sort_pred()); // sort population
+		forward_list::sort(population2.begin(), population2.end(), sort_pred()); // sort population
+	
+
+	return;
+
+	// Thsi thing not needed in solution2
 	int i = 0;
-	for(i = 0; i+num_proc<population.size(); i+=num_proc)
+	for(i = 0; i+num_proc<main_pop_size; i+=num_proc)
 	{
-		for (int j = 0; j < num_proc; j++) {
+		for (int j = 0; j < num_proc; j++)
+		{
 	  		th_population[j].push_back(population[i+j]);
 	  	}
 	}
-	int z = population.size()-i;
+
+	int z = main_pop_size-i;
 	for(int j = 0; j<z; j++){
 		th_population[j].push_back(population[i+j]);
 	}
+
 	for(int o=0;o<num_proc;o++)
 	{
 		real_size_population[o] = th_population[o].size();
@@ -291,7 +298,7 @@ void Genetic::showPopulation(int thread_id)
 void Genetic::showPopulation()
 {
 	cout << "\ninitialPopulation complete...\n\n";
-	for(vector<pair<vector<int>, int> >::iterator it=population.begin(); it!=population.end(); ++it)
+	for(forward_list<my_pair>::iterator it=population2.begin(); it!=population2.end(); ++it)
 	{
 		const vector<int>& vec = (*it).first; // gets the vector
 
@@ -335,22 +342,14 @@ void Genetic::insertBinarySearch(vector<int>& child, int total_cost)
 
 	int imin = 0;
 	int imax = main_pop_size - 1;
-
-	while(imax >= imin)
+	for(forward_list<my_pair>::iterator it = population2.begin(); it != population2.end() ;  ++it)
 	{
-		int imid = imin + (imax - imin) / 2;
-
-		if(total_cost == population[imid].second)
+		if(total_cost == it.second)
 		{
-			population.insert(population.begin() + imid, make_pair(child, total_cost));
-			return;
+			population2.insert_before(it, make_pair(child, total_cost));
+			return;	
 		}
-		else if(total_cost > population[imid].second)
-			imin = imid + 1;
-		else
-			imax = imid - 1;
 	}
-	population.insert(population.begin() + imin, make_pair(child, total_cost));
 }
 
 
