@@ -12,6 +12,7 @@
 #include <sys/time.h>
 #include <fstream>
 #include <forward_list>
+#include "barrier.h"
 
 #define num_proc N
 
@@ -79,5 +80,7 @@ public:
 	void insertBinarySearch(std::vector<int>& child, int total_cost); // binary insert to thread population stack
 	void showPopulation(int thread_id); // show thread's population stack
 };
+
+Barrier barrier(N);
 
 #endif
