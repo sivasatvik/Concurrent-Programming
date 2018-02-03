@@ -12,7 +12,7 @@
 #include <sys/time.h>
 #include <fstream>
 #include <forward_list>
-#include "barrier.h"
+#include "lazylist.h"
 
 #define num_proc N
 
@@ -55,7 +55,10 @@ private:
 	std::vector< my_pair > population; // each element is a pair: vector and total cost
 	std::forward_list<my_pair> population2;
 
+	LazyList population3;
+
   	std::vector<my_pair> th_population[num_proc];
+  	
 	int size_population; // size of population
 	int main_pop_size;
 	int curr_pop_size;

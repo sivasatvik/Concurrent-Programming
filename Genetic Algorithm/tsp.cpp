@@ -219,8 +219,9 @@ void Genetic::initialPopulation() // generates the initial population
 
 	if(total_cost != -1) // checks if the parent is valid
 	{
-		population2.push_front(make_pair(parent, total_cost)); // inserts in the population
-			main_pop_size++; // increments main_pop_size
+		// population2.push_front(make_pair(parent, total_cost)); // inserts in the population
+		population.add(make_pair(parent, total_cost));
+		main_pop_size++; // increments main_pop_size
 	}
 
 	// makes random permutations "generations" times
@@ -234,7 +235,8 @@ void Genetic::initialPopulation() // generates the initial population
 		// checks if permutation is a valid solution and if not exists
 		if(total_cost != -1 && !existsChromosome(parent))
 		{
-			population2.push_front(make_pair(parent, total_cost)); // add in population
+			// population2.push_front(make_pair(parent, total_cost)); // add in population
+			population.add(make_pair(parent, total_cost));
 			main_pop_size++; // increments main_pop_size in the unit
       // cout<<main_pop_size<<endl;
 		}
@@ -248,7 +250,7 @@ void Genetic::initialPopulation() // generates the initial population
 	if(main_pop_size == 0)
 		cout << "\nEmpty initial population ;( Try again\n";
 	else
-		forward_list::sort(population2.begin(), population2.end(), sort_pred()); // sort population
+		// forward_list::sort(population2.begin(), population2.end(), sort_pred()); // sort population
 	
 
 	return;
