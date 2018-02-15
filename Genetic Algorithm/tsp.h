@@ -74,9 +74,9 @@ public:
 	Genetic(Graph* graph, int amount_population, int generations, int mutation_rate, bool show_population = true); // constructor
 	int isValidSolution(std::vector<int>& solution); // checks if a solution is valid
 	void showPopulation(); // shows population
-	void crossOver(std::vector<int>& parent1, std::vector<int>& parent2, int thread_id); // makes the crossover
+	void crossOver(std::vector<int> parent1, std::vector<int> parent2); // makes the crossover
 	void insertBinarySearch(std::vector<int>& child, int total_cost, int thread_id); // uses binary search to insert
-	void run(int thead_id); // runs genetic algorithm(Multi-threaded)
+	void run(); // runs genetic algorithm(Multi-threaded)
 	int getCostBestSolution(); // returns cost of the best solution
 	bool existsChromosome(const std::vector<int> & v, int thread_id); // checks if exists the chromosome in threads population stack
 	bool existsChromosome(const std::vector<int> & v); // checks if exists the chromosome in parent population stack
@@ -84,6 +84,5 @@ public:
 	void showPopulation(int thread_id); // show thread's population stack
 };
 
-Barrier barrier(N);
 
 #endif

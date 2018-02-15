@@ -1,6 +1,7 @@
 #ifndef LZ_L
 #define LZ_L
 
+#include <bits/stdc++.h>
 #include <vector>
 #include <mutex>
 #include <chrono>
@@ -30,12 +31,16 @@ struct Node{
 
 
 class LazyList{
+public:
 	LazyList();
 	bool add(my_pair item);
 	bool remove(my_pair item);
 	bool contains(my_pair item);
+	std::vector<int> choose(int x);
 private:
 	Node *head;
 	Node *tail;
-	bool validate(Node pred, Node curr);
+	bool validate(Node * pred, Node * curr);
 };
+
+#endif

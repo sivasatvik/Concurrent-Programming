@@ -1,10 +1,10 @@
 #include <iostream>
 #include <algorithm>
-#include <lazylist.h>
+#include "lazylist.h"
 
 
 
-Lazylist::LazyList(){
+LazyList::LazyList(){
 		head = new Node;
 		tail = new Node;
 		head->key = 0;
@@ -15,8 +15,8 @@ Lazylist::LazyList(){
 		tail->next = NULL;
 	}
 
-bool LazyList::validate(Node pred, Node curr){
-	return !pred.marked && !curr.marked && pred.next == curr;
+bool LazyList::validate(Node *pred, Node *curr){
+	return !pred->marked && !curr->marked && pred->next == curr;
 }
 
 
@@ -24,10 +24,10 @@ bool LazyList::add(my_pair item){
 	int key = item.second;
 	int i = 0;
 	while(1){
-		Node pred = head;
-		Node curr = head.next;
+		Node * pred = head;
+		Node * curr = head->next;
 		while(curr->key < key){
-			pred = curr; curr = curr.next; i++;
+			pred = curr; curr = curr->next; i++;
 		}
 		// pred_mx[i].lock();
 		// curr_mx[i+1].lock();
@@ -94,4 +94,14 @@ bool LazyList::contains(my_pair item){
 		curr = curr->next;
 	}
 	return curr->key == key && !curr->marked;
+}
+
+
+std::vector<int> LazyList::choose(int id){
+	Node * temp = head;
+	temp = temp->next;
+	for(int i = 0; i<id; i++){
+		temp = temp->next;
+	}
+	return temp->item.first;
 }

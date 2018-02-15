@@ -27,7 +27,7 @@ int main()
 	// Vector of created threads
 	vector<thread> threads;
 	for(int i = 0; i<num_proc; i++){
-		threads.push_back(std::thread(&Genetic::run, &genetic, i));
+		threads.push_back(std::thread(&Genetic::run, &genetic, NULL));
 	}
 
 	// Wait for threads to finish
