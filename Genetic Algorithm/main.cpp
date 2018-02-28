@@ -15,25 +15,31 @@ int main()
 
 	// parameters: the graph, population size, generations and mutation rate
 	// optional parameters: show_population
+
+	cout<<__LINE__<<" In main() before genetic class object creation"<<endl;
+
+
 	Genetic genetic(graph4, POP, GEN, 5, true);
 
 	// gets initial my_population
 	// genetic.initialPopulation(); 
 	
-	
+	cout<<__LINE__<<" In main() before thread creation"<<endl;
 	struct timeval start;
 	gettimeofday(&start, 0);
 	
 	// Vector of created threads
 	vector<thread> threads;
 	for(int i = 0; i<num_proc; i++){
-		threads.push_back(std::thread(&Genetic::run, &genetic, NULL));
+		threads.push_back(std::thread(&Genetic::run, &genetic));
 	}
 
 	// Wait for threads to finish
 	for(auto &th : threads) th.join();
 	struct timeval end;
 	gettimeofday(&end, 0);
+
+	cout<<__LINE__<<" Done with generations, now going to get the best solutions"<<endl;
 
 	// Get final minimum of results from each thread
 	genetic.getResult();  

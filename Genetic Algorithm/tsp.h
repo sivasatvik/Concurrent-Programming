@@ -14,6 +14,8 @@
 #include <forward_list>
 #include "lazylist.h"
 
+#define N 4
+
 #define num_proc N
 
 
@@ -62,7 +64,7 @@ private:
 	int size_population; // size of population
 	int main_pop_size;
 	int curr_pop_size;
-	int real_size_population; // real size population
+	std::atomic<int> real_size_population; // real size population
 	int generations; // amount of generations
 	int mutation_rate; // mutation rate
 	bool show_population; // flag to show population

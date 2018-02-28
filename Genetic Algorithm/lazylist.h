@@ -1,12 +1,13 @@
 #ifndef LZ_L
 #define LZ_L
 
+
 #include <bits/stdc++.h>
 #include <vector>
 #include <mutex>
 #include <chrono>
 
-std::mutex pred_mx[POP], curr_mx[POP], mx[POP];
+
 typedef std::pair<std::vector<int >, int > my_pair;
 
 
@@ -37,10 +38,14 @@ public:
 	bool remove(my_pair item);
 	bool contains(my_pair item);
 	std::vector<int> choose(int x);
+	int get_size();
+	Node * get_head();
 private:
+	std::mutex mx[POP+1];
 	Node *head;
 	Node *tail;
 	bool validate(Node * pred, Node * curr);
+	int size;
 };
 
 #endif
