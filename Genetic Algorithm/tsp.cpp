@@ -19,8 +19,12 @@ Graph::Graph(int V, int initial_vertex, bool random_graph) // constructor of Gra
 	this->total_edges = 0; // initially the total of edges is 0
 
 	// if 3rd argument is true
-	if(random_graph)
-		generatesGraph();
+	
+	generatesGraph();
+	// showGraph();
+	floydWarshall();
+	// showGraph();
+	cout << "FloydWarshall distace == calculated\n\n";
 }
 
 
@@ -42,8 +46,8 @@ void Graph::generatesGraph()
 	// Connect all the edges of graph
 	for(i = 0; i <= V; i++)
 	{
-		weight = rand() % V + 1; // random weight in range [1,V]
-
+		weight = rand() % 100 + 1; // random weight in range [1,100]
+		// cout<<weight<<endl;
 		if(i + 1 < V)
 			addEdge(vec[i], vec[i + 1], weight);
 		else
@@ -58,15 +62,27 @@ void Graph::generatesGraph()
 	int size_edges = rand() % (2 * limit_edges) + limit_edges;
 
 	// add some extra edges in graph
-	for(int i = 0; i < size_edges; i++)
+	for(int i = 0; i < 2*V; i++)
 	{
 		int src = rand() % V; // random source
 		int dest = rand() % V; // random destination
-		weight = rand() % V + 1; // random weight in range [1,V]
+		weight = rand() % 100 + 1; // random weight in range [1,V]
 		if(src != dest)
 		{
-			addEdge(vec[src], vec[dest], weight);
-			addEdge(vec[dest], vec[src], weight);
+			if(rand()%10>7){
+				weight = INF;
+				addEdge(vec[src], vec[dest], weight);
+			}
+			else{
+				addEdge(vec[src], vec[dest], weight);
+			}
+			if(rand()%10>7){
+				weight=INF;
+				addEdge(vec[dest], vec[src], weight);
+			}	
+			else{
+				addEdge(vec[dest], vec[src], weight);
+			}
 		}
 	}
 }
@@ -103,7 +119,9 @@ int Graph::existsEdge(int src, int dest) // checks if exists a edge
 
 	if(it != map_edges.end())
 		return it->second; // returns cost
-	return -1;
+
+	// cout <<   __LINE__  << " -->  " <<  it->second <<  " " << src << " " << dest << endl;
+	return 0;
 }
 
 
@@ -296,7 +314,7 @@ void Genetic::initialPopulation() // generates the initial population
 		// cout << "Initial Thread Populations \n";
 		// showPopulation(o);
 	}*/
-	cout<<__LINE__<<" Population 3 ka size: "<<population3.get_size()<<endl;
+	// cout<<__LINE__<<" Population 3 ka size: "<<population3.get_size()<<endl;
 	real_size_population = population3.get_size();
 	cout<<"----------------------------------------------------------------------------------------------"<<endl;
 	// showPopulation();
@@ -564,20 +582,20 @@ void Genetic::run()
 {
 
 	// cout<<"Thead number "<<thread_id<<" is running rn!!\n";
-	//auto n_generation = (generations *3) / num_proc;
+	generations = (generations * (num_proc-1)) / num_proc;
 	// auto n_generation = generations;
 	// cout<<"Hello1: "<<n_generation;
-	cout<<__LINE__<<" In run()"<<endl;
+	// cout<<__LINE__<<" In run()"<<endl;
 	// int my_max_size_population = (1.5 * size_population)/num_proc; // <==== see best value for this 
-	cout<<__LINE__<<" Total population size = "<<real_size_population<<endl;
+	// cout<<__LINE__<<" Total population size = "<<real_size_population<<endl;
 
 	if(real_size_population == 0)
 		return;
 
-	cout<<__LINE__<<" Total population size = "<<real_size_population<<endl;
+	// cout<<__LINE__<<" Total population size = "<<real_size_population<<endl;
 	for(int i = 0; i < generations; i++)
 	{
-		cout<<__LINE__<<" In generation number: "<<i<<endl;
+		// cout<<__LINE__<<" In generation number: "<<i<<endl;
 		int  old_size_population = real_size_population;
 
 		/* selects two parents (if exists) who will participate
@@ -662,7 +680,7 @@ void Genetic::run()
 			}
 		}
 	}
-	cout<<__LINE__<<" Out of run()"<<endl;
+	// cout<<__LINE__<<" Out of run()"<<endl;
 	// if(show_population == true)
 	// showPopulation(thread_id); // shows the th_population[thread_id]
 }
@@ -674,18 +692,35 @@ void Genetic::getResult(){
 	result = result->next;
 	cout << "\nBest solution: ";
 	const vector<int>& vec = result->item.first;
-	for(int i = 0; i < graph->V; i++)
-		cout << vec[i] << " ";
+
+	// for(int i = 0; i < graph->V; i++)
+	// 	cout << vec[i]<<" ";
+	// cout<<endl;
+
+
+	for(int i = 0; i < graph->V; i++){
+		cout << vec[i];
+		if(i != graph->V-1)
+	    {
+	    	cout << graph->inbetween_vert[make_pair(vec[i], vec[i+1])] << " ";
+		    // cout << vec[i+1] << " ";
+		}
+	    else
+	    {
+	    	cout << graph->inbetween_vert[make_pair(vec[i], vec[0])] << " ";
+	        // cout << vec[0] << " ";
+	    }
+	}
 	// cout << graph->initial_vertex;
 	cout << " | Cost: " << result->item.second;
 
-	// ofstream file;
-	// file.open("Multi-threaded_1.csv",ios::out | ios::app);
-	// file<<"\n"<<N<<","<<SEED<<","<<POP<<","<<C<<","<<result[0].second<<",";
-	// for(int i = 0; i < graph->V; i++)
-	// 	file << vec[i] << " ";
+	ofstream file;
+	file.open("Multi-threaded_1.csv",ios::out | ios::app);
+	file<<"\n"<<N<<","<<SEED<<","<<POP<<","<<C<<","<<GEN<<","<<result->item.second<<",";
+	for(int i = 0; i < graph->V; i++)
+		file << vec[i] << " ";
 
-	// file.close();
+	file.close();
 }
 
 
@@ -696,3 +731,73 @@ int Genetic::getCostBestSolution()
 		return population[0].second;
 	return -1;
 }
+
+
+//__________________________________________________________________________________________________
+// Extra functions added here
+
+void Graph::floydWarshall()
+{
+	int i, j, k;
+	// cout<<__LINE__<<" Is it till here?"<<endl;
+	int ** dist = new int * [V];
+	for(int l = 0; l<V; l++){
+		dist[l] = new int [V];
+	}
+	// cout<<__LINE__<<" Is it till here?"<<endl;
+	for(i = 0; i < V; i++)
+	{
+		for(j = 0; j < V; j++)
+		{
+			if(existsEdge(i,j) != 0)
+			{
+				// cout<<dist[i][j]<<" ";
+				dist[i][j] = map_edges[make_pair(i, j)];
+			}
+			else
+			{
+				if(i == j)
+				{
+					dist[i][j] = 0;
+				}
+				else
+					dist[i][j] = INF; // INFINITY ACTUALLY
+			}
+
+			// cout <<  __LINE__ << " " << i << " " << j << " " << dist[i][j] << endl;
+			inbetween_vert[make_pair(i, j)] = "";
+		}
+	}
+	for(k = 0; k < V; k++)
+	{
+		for(i = 0; i < V; i++)
+		{
+			for(j = 0; j < V; j++)
+			{
+				if(dist[i][k] + dist[k][j] < dist[i][j])
+				{
+					inbetween_vert[make_pair(i, j)] += " " + std::to_string(k);
+					// cout << inbetween_vert[make_pair(i, j)] << endl;
+					dist[i][j] = dist[i][k] + dist[k][j];
+				}
+			}
+		}
+	}
+	for(i = 0; i < V; i++)
+	{
+		for(j = 0; j < V; j++)
+		{
+			if(i != j) 
+			{
+
+				map_edges[make_pair(i, j)] = dist[i][j];
+
+				// cout <<  __LINE__ << " " << i << " " << j << " " << dist[i][j] << endl;
+			}
+
+		}
+	}
+
+}
+
+

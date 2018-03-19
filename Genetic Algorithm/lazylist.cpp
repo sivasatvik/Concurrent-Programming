@@ -30,7 +30,7 @@ bool LazyList::add(my_pair item){
 		while(curr->key < key){
 			pred = curr; curr = curr->next; i++;
 		}
-		if(i>=20){
+		if(i>=POP){
 			return false;
 		}
 		// pred_mx[i].lock();

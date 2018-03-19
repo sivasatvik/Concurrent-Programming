@@ -16,7 +16,7 @@ int main()
 	// parameters: the graph, population size, generations and mutation rate
 	// optional parameters: show_population
 
-	cout<<__LINE__<<" In main() before genetic class object creation"<<endl;
+	// cout<<__LINE__<<" In main() before genetic class object creation"<<endl;
 
 
 	Genetic genetic(graph4, POP, GEN, 5, true);
@@ -24,7 +24,7 @@ int main()
 	// gets initial my_population
 	// genetic.initialPopulation(); 
 	
-	cout<<__LINE__<<" In main() before thread creation"<<endl;
+	// cout<<__LINE__<<" In main() before thread creation"<<endl;
 	struct timeval start;
 	gettimeofday(&start, 0);
 	
@@ -39,7 +39,7 @@ int main()
 	struct timeval end;
 	gettimeofday(&end, 0);
 
-	cout<<__LINE__<<" Done with generations, now going to get the best solutions"<<endl;
+	// cout<<__LINE__<<" Done with generations, now going to get the best solutions"<<endl;
 
 	// Get final minimum of results from each thread
 	genetic.getResult();  
@@ -50,7 +50,7 @@ int main()
 	cout<<"----------------------------------------------------------------------------------------------\n";
 
 	ofstream file1;
-	file1.open("Multi-threaded.csv",ios::out | ios::app);
+	file1.open("Multi-threaded_1.csv",ios::out | ios::app);
 	file1<<","<<time_val<<"\n";
 	file1.close();
 	return 0;
