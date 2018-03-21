@@ -1,3 +1,4 @@
 all:
-	g++ -std=c++14 -pthread tsp.cpp main.cpp -o main.o -DN=4 -DSEED=15 -DC=50 -DPOP=20 -DGEN=5000
+	reset
+	g++ -std=c++17 lazylist.cpp tsp.cpp main.cpp -o main.o -pthread -DSEED=11 -DC=500 -DPOP=20 -DGEN=5000 -DINF=9999
 	./main.o
