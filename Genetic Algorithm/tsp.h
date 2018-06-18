@@ -1,20 +1,14 @@
 #ifndef TSP_H
 #define TSP_H
 
-#include <vector>
 #include <map>
 #include <set>
-#include <utility> // pair
-#include <time.h> // time
-#include <stdlib.h> // srand, rand
-#include <thread>
 #include <atomic>
-#include <sys/time.h>
 #include <fstream>
 #include <forward_list>
-#include "lazylist.h"
+#include "lockfree.h"
 
-#define N 4
+#define N M
 
 #define num_proc N
 
@@ -59,9 +53,9 @@ private:
 	std::vector< my_pair > population; // each element is a pair: vector and total cost
 	std::forward_list<my_pair> population2;
 
-	LazyList population3;
+	llist_t * the_list;
 
-  	std::vector<my_pair> th_population[num_proc];
+  	// std::vector<my_pair> th_population[num_proc];
   	
 	int size_population; // size of population
 	int main_pop_size;
@@ -79,12 +73,12 @@ public:
 	int isValidSolution(std::vector<int>& solution); // checks if a solution is valid
 	void showPopulation(); // shows population
 	void crossOver(std::vector<int> parent1, std::vector<int> parent2); // makes the crossover
-	void insertBinarySearch(std::vector<int>& child, int total_cost, int thread_id); // uses binary search to insert
+	// void insertBinarySearch(std::vector<int>& child, int total_cost, int thread_id); // uses binary search to insert
 	void run(); // runs genetic algorithm(Multi-threaded)
 	int getCostBestSolution(); // returns cost of the best solution
-	bool existsChromosome(const std::vector<int> & v, int thread_id); // checks if exists the chromosome in threads population stack
-	bool existsChromosome(const std::vector<int> & v); // checks if exists the chromosome in parent population stack
-	void insertBinarySearch(std::vector<int>& child, int total_cost); // binary insert to thread population stack
+	// bool existsChromosome(const std::vector<int> & v, int thread_id); // checks if exists the chromosome in threads population stack
+	// bool existsChromosome(const std::vector<int> & v); // checks if exists the chromosome in parent population stack
+	// void insertBinarySearch(std::vector<int>& child, int total_cost); // binary insert to thread population stack
 	void showPopulation(int thread_id); // show thread's population stack
 };
 

@@ -1,5 +1,3 @@
-#include <iostream>
-#include <algorithm> // sort, next_permutation
 #include "tsp.h"
 using namespace std;
 
@@ -140,9 +138,9 @@ Genetic::Genetic(Graph* graph, int size_population, int generations, int mutatio
 	}
 	this->graph = graph;
 	this->size_population = size_population;
+	this->the_list = list_new();
 	// each thread's stack polulation size is initialized to zero
-	for(int i=0;i<num_proc;i++)
-		this->real_size_population = 0;
+	this->real_size_population = 0;
 	this->generations = generations;
 	this->mutation_rate = mutation_rate;
 	this->show_population = show_population;
@@ -213,17 +211,17 @@ int Genetic::isValidSolution(vector<int>& solution)
 	return false;
 }*/
 // Check if vector v already in thread's population stack
-bool Genetic::existsChromosome(const vector<int> & v)
-{
-	// checks if exists in the population
-	for(forward_list<my_pair>::iterator it=population2.begin(); it!=population2.end(); ++it)
-	{
-		const vector<int>& vec = (*it).first; // gets the vector
-		if(equal(v.begin(), v.end(), vec.begin())) // compares vectors
-			return true;
-	}
-	return false;
-}
+// bool Genetic::existsChromosome(const vector<int> & v)
+// {
+// 	// checks if exists in the population
+// 	for(forward_list<my_pair>::iterator it=population2.begin(); it!=population2.end(); ++it)
+// 	{
+// 		const vector<int>& vec = (*it).first; // gets the vector
+// 		if(equal(v.begin(), v.end(), vec.begin())) // compares vectors
+// 			return true;
+// 	}
+// 	return false;
+// }
 
 // Creats n random solution at start
 void Genetic::initialPopulation() // generates the initial population
@@ -247,7 +245,8 @@ void Genetic::initialPopulation() // generates the initial population
 	if(total_cost != -1) // checks if the parent is valid
 	{
 		// population2.push_front(make_pair(parent, total_cost)); // inserts in the population
-		population3.add(make_pair(parent, total_cost));
+		// population3.add(make_pair(parent, total_cost));
+		list_add(the_list,make_pair(parent, total_cost));
 		main_pop_size++; // increments main_pop_size
 	}
 
@@ -267,11 +266,12 @@ void Genetic::initialPopulation() // generates the initial population
 		// cout<<__LINE__<<" Checking whether it's a solution or not"<<endl;
 
 		// checks if permutation is a valid solution and if not exists
-		if(total_cost != -1 && !population3.contains(make_pair(parent,total_cost)))
+		if(total_cost != -1 && !list_contains(the_list,make_pair(parent,total_cost)))
 		{
 			// population32.push_front(make_pair(parent, total_cost)); // add in population3
 			// cout<<__LINE__<<" Adding solution to the lazy list"<<endl;
-			population3.add(make_pair(parent, total_cost));
+			// population3.add(make_pair(parent, total_cost));
+			list_add(the_list,make_pair(parent, total_cost));
 			main_pop_size++; // increments main_pop_size in the unit
 
 			// cout<<__LINE__<<" Solution == added to the lazy list, cost: "<<total_cost<<endl;
@@ -293,7 +293,7 @@ void Genetic::initialPopulation() // generates the initial population
 	
 
 
-	// Thsi thing not needed in solution2
+	// This thing not needed in solution2
 	/*int i = 0;
 	for(i = 0; i+num_proc<main_pop_size; i+=num_proc)
 	{
@@ -315,7 +315,7 @@ void Genetic::initialPopulation() // generates the initial population
 		// showPopulation(o);
 	}*/
 	// cout<<__LINE__<<" Population 3 ka size: "<<population3.get_size()<<endl;
-	real_size_population = population3.get_size();
+	real_size_population = list_size(the_list);
 	cout<<"----------------------------------------------------------------------------------------------"<<endl;
 	// showPopulation();
 	return;
@@ -552,22 +552,22 @@ void Genetic::crossOver(vector<int> parent1, vector<int> parent2)
 
 	// cout<<__LINE__<<" In crossover till before adding the solution to the lazy list"<<endl;
 	// checks if is a valid solution and not exists in the population
-	if(total_cost_child1 != -1 && !population3.contains(make_pair(child1,total_cost_child1)))
+	if(total_cost_child1 != -1 && !list_contains(the_list,make_pair(child1,total_cost_child1)))
 	{
 		// add child in the population
 		// cout<<__LINE__<<" Adding child1"<<endl;
-		if(population3.add(make_pair(child1,total_cost_child1)))
+		if(list_add(the_list,make_pair(child1,total_cost_child1)))
 			real_size_population++; // increments the real_size_population
 		//insertBinarySearch(child1, total_cost_child1, thread_id); // uses binary search to insert
 	}
 
 	// cout<<__LINE__<<" After adding child1 to the lazy list"<<endl;
 	// checks again...
-	if(total_cost_child2 != -1 && !population3.contains(make_pair(child2,total_cost_child2)))
+	if(total_cost_child2 != -1 && !list_contains(the_list,make_pair(child2,total_cost_child2)))
 	{
 		// add child in the population
 		// cout<<__LINE__<<" Adding child2"<<endl;
-		if(population3.add(make_pair(child2,total_cost_child2)))
+		if(list_add(the_list,make_pair(child2,total_cost_child2)))
 			real_size_population++; // increments the real_size_population
 		// insertBinarySearch(child2, total_cost_child2, thread_id); // uses binary search to insert
 	}
@@ -608,8 +608,8 @@ void Genetic::run()
 				/*forward_list<my_pair>::iterator it = population2.begin();
 				auto first_elem = it;
 				auto second_elem = it++;*/
-				auto first_elem = population3.choose(0);
-				auto second_elem = population3.choose(1);
+				auto first_elem = choose(the_list,0);
+				auto second_elem = choose(the_list,1);
 				crossOver(first_elem, second_elem);
 			}
 			else
@@ -639,8 +639,8 @@ void Genetic::run()
 					}
 				}*/
 
-				auto parent1_elem = population3.choose(parent1);
-				auto parent2_elem = population3.choose(parent2);
+				auto parent1_elem = choose(the_list,parent1);
+				auto parent2_elem = choose(the_list,parent2);
 				// cout<<__LINE__<<" Before crossing over the two parents chosen"<<endl;
 				crossOver(parent1_elem, parent2_elem);
 			}
@@ -672,7 +672,7 @@ void Genetic::run()
 		else // th_population[thread_id] contains only 1 parent
 		{
 			// applying crossover in the parent
-			crossOver(population3.choose(0), population3.choose(0));
+			crossOver(choose(the_list,0), choose(the_list,0));
 			if(real_size_population > size_population)
 			{
 				//population2.pop_front(); // removes the worst parent of the th_population[thread_id]
@@ -688,10 +688,10 @@ void Genetic::run()
 // Gets each threads result and print minimum
 void Genetic::getResult(){
 	//sort(result.begin(), result.end(), sort_pred());
-	Node * result = population3.get_head();
+	node_t * result = get_head(the_list);
 	result = result->next;
 	cout << "\nBest solution: ";
-	const vector<int>& vec = result->item.first;
+	const vector<int>& vec = result->data.first;
 
 	// for(int i = 0; i < graph->V; i++)
 	// 	cout << vec[i]<<" ";
@@ -712,11 +712,11 @@ void Genetic::getResult(){
 	    }
 	}
 	// cout << graph->initial_vertex;
-	cout << " | Cost: " << result->item.second;
+	cout << " | Cost: " << result->data.second;
 
 	ofstream file;
 	file.open("Multi-threaded_1.csv",ios::out | ios::app);
-	file<<"\n"<<N<<","<<SEED<<","<<POP<<","<<C<<","<<GEN<<","<<result->item.second<<",";
+	file<<"\n"<<N<<","<<SEED<<","<<POP<<","<<C<<","<<GEN<<","<<result->data.second<<",";
 	for(int i = 0; i < graph->V; i++)
 		file << vec[i] << " ";
 
